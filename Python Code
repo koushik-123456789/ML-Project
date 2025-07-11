@@ -1,0 +1,70 @@
+# 1. Import Libraries
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+import seaborn as sns
+from sklearn.model_selection import train_test_split
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import classification_report, confusion_matrix
+from sklearn.preprocessing import LabelEncoder
+
+# 2. Load Dataset
+# Replace with the correct path to your dataset
+# df = pd.read_csv('ecommerce_product_data.csv')
+df = pd.read_csv('C:\\Users\\saikr\\Downloads\\ecommerce_product_mock_dataset.csv')  # Update path accordingly
+
+# Preview the dataset
+df.head()
+
+# 3. Data Preprocessing
+# Drop missing values
+df.dropna(subset=['product_description', 'category'], inplace=True)
+
+# Encode the target labels
+label_encoder = LabelEncoder()
+df['category_encoded'] = label_encoder.fit_transform(df['category'])
+
+# Feature and target split
+X = df['product_description']
+y = df['category_encoded']
+
+# 4. Train-Test Split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+# 5. Text Vectorization (TF-IDF)
+tfidf = TfidfVectorizer(max_features=5000)
+X_train_tfidf = tfidf.fit_transform(X_train)
+X_test_tfidf = tfidf.transform(X_test)
+
+# 6. Model Training
+model = LogisticRegression(max_iter=1000)
+model.fit(X_train_tfidf, y_train)
+
+# 7. Evaluation
+y_pred = model.predict(X_test_tfidf)
+
+print("Classification Report:\n", classification_report(y_test, y_pred, target_names=label_encoder.classes_))
+
+# Confusion matrix visualization
+conf_mat = confusion_matrix(y_test, y_pred)
+plt.figure(figsize=(10, 8))
+sns.heatmap(conf_mat, annot=True, fmt='d', 
+            xticklabels=label_encoder.classes_, 
+            yticklabels=label_encoder.classes_, cmap='Blues')
+plt.xlabel("Predicted")
+plt.ylabel("Actual")
+plt.title("Confusion Matrix")
+plt.show()
+
+# 8. Prediction on New Data
+def predict_category(description):
+    vec = tfidf.transform([description])
+    pred = model.predict(vec)
+    return label_encoder.inverse_transform(pred)[0]
+
+# Example prediction
+example = "Wireless Bluetooth Noise Cancelling Headphones"
+print(f"Predicted Category: {predict_category(example)}")
