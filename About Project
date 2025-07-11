@@ -1,4 +1,4 @@
-The aim of the E-Commerce Product Category Prediction project isTo develop a machine learning model that can automatically predict the correct category of a product based 
+The aim of the E-Commerce Product Category Prediction project is to develop a machine learning model that can automatically predict the correct category of a product based 
 on its information such as name, description, brand, and other attributes.
 Dataset:
 We have taken the dataset from kaggle.
